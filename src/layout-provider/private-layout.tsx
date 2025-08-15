@@ -2,11 +2,18 @@ import React from 'react'
 import Header from './header'
 import Cookies from 'js-cookie'
 import { getUserInfo } from '@/actions/users'
+import Loader from '@/components/ui/loader'
+import ErrorMessage from '@/components/ui/error-message'
+import useUsersGlobalStore, { IUsersGlobalStore } from '@/store/users-global-store'
+import toast from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
 
 function PrivateLayout({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = React.useState(null)
+    const {setUser} = useUsersGlobalStore() as IUsersGlobalStore
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState(null)
+    const router = useRouter()
+
     const fetchUser = async () => {
         try {
             const token: any = Cookies.get('token')
@@ -17,6 +24,10 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
                 setError(res.message)
             }
         } catch (error: any) {
+            Cookies.remove('token')
+            Cookies.remove('role')
+            toast.error(error.message)
+            router.push('/login')
             setError(error.message)
         } finally {
             setLoading(false)
@@ -28,19 +39,17 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
 
     if (loading) {
         return <div className='flex justify-center items-center h-screen'>
-            Loading...
+            <Loader />
         </div>
-
     }
+
     if (error) {
-        return <div className='flex justify-center items-center h-screen text-red-500'>
-            {error}
-        </div>
+        return <ErrorMessage error={error} />
     }
 
     return (
         <div>
-            <Header user={user} />
+            <Header />
             <div className='p-5'>{children}</div>
         </div>
     )
