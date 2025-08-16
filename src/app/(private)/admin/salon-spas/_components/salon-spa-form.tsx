@@ -14,7 +14,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { workingDays } from "@/constants/indext";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 interface SalonSpaFormProps {
   initialValues?: any;
@@ -37,14 +46,14 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
     working_days: z.array(z.string().nonempty()),
     start_time: z.string().min(1, "Start time is required"),
     end_time: z.string().min(1, "End time is required"),
-    break_start_time: z.string().nonempty,
+    break_start_time: z.string().nonempty(),
     break_end_time: z.string().nonempty(),
     min_service_price: z.number(),
     max_service_price: z.number(),
     offer_status: z.string().nonempty(),
     slot_duration: z.number(),
     max_booking_per_slot: z.number(),
-    location_name: z.string().nonempty(),
+    location_name: z.string(),
     latitude: z.string(),
     longitude: z.string(),
   });
@@ -250,6 +259,165 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
                 </FormItem>
               )}
             />
+          </div>
+
+          {/* 工作日选择 字段组 */}
+          <div className="p-5 border border-gray-300 rounded-md flex flex-col gap-5">
+            <h1 className="text-sm! font-semibold! text-gray-600">
+              Working Days
+            </h1>
+            <div className="flex felx-wrap gap-10">
+              {workingDays.map((day) => (
+                <FormField
+                  key={day.value}
+                  control={form.control}
+                  name="working_days"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value.includes(day.value)}
+                          onCheckedChange={(checked) => {
+                            const newValue = checked
+                              ? [...field.value, day.value]
+                              : field.value.filter(
+                                  (d: string) => d !== day.value
+                                );
+                            field.onChange(newValue);
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel>{day.label}</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
+
+            {/* 其他字段 */}
+            <div className="grid grid-cols-3 gap-5">
+              <FormField
+                control={form.control}
+                name="start_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="end_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="break_start_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Break Start Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="break_end_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Break End Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Slot Duration */}
+              <FormField
+                control={form.control}
+                name="slot_duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Slot Duration (minutes)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder=""
+                        {...field}
+                        onChange={(e) => {
+                          form.setValue(
+                            "slot_duration",
+                            parseInt(e.target.value)
+                          );
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Max Booking Per Slot */}
+              <FormField
+                control={form.control}
+                name="max_booking_per_slot"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Booking Per Slot</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder=""
+                        {...field}
+                        onChange={(e) => {
+                          form.setValue(
+                            "max_booking_per_slot",
+                            parseInt(e.target.value)
+                          );
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Location Name */}
+          {/* 后面完善地图选点功能 */}
+          {/* <div className="p-5 border border-gray-300 rounded-md flex flex-col gap-5">
+            <h1>Location</h1>
+          </div> */}
+
+          <div className="flex justify-end gap-5">
+            <Button type="button" variant="outline">
+              Cancel
+            </Button>
+
+            <Button type="submit">
+              {formType === "add" ? "Add" : "Update"}
+            </Button>
           </div>
         </form>
       </Form>
