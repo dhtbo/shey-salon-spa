@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { start } from "repl";
@@ -27,7 +27,9 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { creatNewSalonSpa, updateSalonSpaById } from "@/actions/salon-spas";
 import toast from "react-hot-toast";
-import useUsersGlobalStore, { IUsersGlobalStore } from "@/store/users-global-store";
+import useUsersGlobalStore, {
+  IUsersGlobalStore,
+} from "@/store/users-global-store";
 
 interface SalonSpaFormProps {
   initialValues?: any;
@@ -42,7 +44,7 @@ const offerstatuses = [
 function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
   const [loading, setLoading] = React.useState(false);
   const router = useRouter();
-  const {user} = useUsersGlobalStore() as IUsersGlobalStore; // 从全局状态中获取用户
+  const { user } = useUsersGlobalStore() as IUsersGlobalStore; // 从全局状态中获取用户
   const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
     description: z.string().min(1, "Description is required"),
@@ -95,29 +97,45 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
     console.log("Form submitted with values:", values);
     try {
       setLoading(true);
-      let response=null;
-      
+      let response = null;
+
       if (formType === "add") {
         // 添加逻辑
         response = await creatNewSalonSpa({
           ...values,
           owner_id: user?.id,
-        })
+        });
         console.log(response);
       } else if (formType === "edit") {
         // 更新逻辑
         response = await updateSalonSpaById({
           id: initialValues.id,
           payload: values,
-        })
+        });
       }
 
-    } catch (error: any) { 
-      toast.error(error.message)
-    } finally { 
+      if (response?.success) {
+        toast.success(response.message);
+        router.push("/admin/salon-spas");
+      } else {
+        toast.error(response?.message || "Error");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (initialValues) {
+      Object.keys(initialValues).forEach((key: any) => {
+        form.setValue(key, initialValues[key]);
+      });
+      
+      form.setValue("zip", initialValues.zip.toString());
+    }
+  }, [initialValues, form]);
 
   return (
     <div className="mt-7">
@@ -441,7 +459,12 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
           </div> */}
 
           <div className="flex justify-end gap-5">
-            <Button type="button" variant="outline" disabled={loading} onClick={() => router.back()}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loading}
+              onClick={() => router.back()}
+            >
               Cancel
             </Button>
 

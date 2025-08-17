@@ -29,4 +29,6 @@ export interface ISaon_Spa {
     location_name: string;
     latitude: number;
     longitude: number;
+    created_at: string;
+    updated_at: string;
 }

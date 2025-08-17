@@ -129,3 +129,8 @@
   justify-content: center;
   align-items: center;
 }
+
+table{
+  margin-top: 20px !important;
+  border: 1px solid #acacac
+}
