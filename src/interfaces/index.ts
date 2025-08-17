@@ -25,7 +25,7 @@ export interface ISaon_Spa {
     min_service_price: number;
     max_service_price: number;
     slot_duration: number; // in minute
-    max_booking_per_slot: number;
+    max_bookings_per_slot: number;
     location_name: string;
     latitude: number;
     longitude: number;

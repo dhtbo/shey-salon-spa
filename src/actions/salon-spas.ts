@@ -24,7 +24,7 @@ export const creatNewSalonSpa = async (payload: any) => {
     }
 }
 
-export const getSalonByOwnerId = async (owner_id: number) => {
+export const getSalonSpaByOwnerId = async (owner_id: number) => {
     try {
         const { data, error } = await supabase.from('salon_spas').select('*').eq('owner_id', owner_id);
         if (error) {

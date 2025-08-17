@@ -24,6 +24,10 @@ import {
 import { workingDays } from "@/constants/indext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { creatNewSalonSpa, updateSalonSpaById } from "@/actions/salon-spas";
+import toast from "react-hot-toast";
+import useUsersGlobalStore, { IUsersGlobalStore } from "@/store/users-global-store";
 
 interface SalonSpaFormProps {
   initialValues?: any;
@@ -36,6 +40,9 @@ const offerstatuses = [
 ];
 
 function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
+  const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
+  const {user} = useUsersGlobalStore() as IUsersGlobalStore; // 从全局状态中获取用户
   const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
     description: z.string().min(1, "Description is required"),
@@ -52,7 +59,7 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
     max_service_price: z.number(),
     offer_status: z.string().nonempty(),
     slot_duration: z.number(),
-    max_booking_per_slot: z.number(),
+    max_bookings_per_slot: z.number(),
     location_name: z.string(),
     latitude: z.string(),
     longitude: z.string(),
@@ -86,7 +93,30 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // 处理表单提交逻辑
     console.log("Form submitted with values:", values);
-    // 这里可以调用 API 或其他逻辑来处理表单数据
+    try {
+      setLoading(true);
+      let response=null;
+      
+      if (formType === "add") {
+        // 添加逻辑
+        response = await creatNewSalonSpa({
+          ...values,
+          owner_id: user?.id,
+        })
+        console.log(response);
+      } else if (formType === "edit") {
+        // 更新逻辑
+        response = await updateSalonSpaById({
+          id: initialValues.id,
+          payload: values,
+        })
+      }
+
+    } catch (error: any) { 
+      toast.error(error.message)
+    } finally { 
+      setLoading(false);
+    }
   }
 
   return (
@@ -380,10 +410,10 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
               {/* Max Booking Per Slot */}
               <FormField
                 control={form.control}
-                name="max_booking_per_slot"
+                name="max_bookings_per_slot"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Max Booking Per Slot</FormLabel>
+                    <FormLabel>Max Bookings Per Slot</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -391,7 +421,7 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
                         {...field}
                         onChange={(e) => {
                           form.setValue(
-                            "max_booking_per_slot",
+                            "max_bookings_per_slot",
                             parseInt(e.target.value)
                           );
                         }}
@@ -411,11 +441,11 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
           </div> */}
 
           <div className="flex justify-end gap-5">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={loading} onClick={() => router.back()}>
               Cancel
             </Button>
 
-            <Button type="submit">
+            <Button type="submit" disabled={loading}>
               {formType === "add" ? "Add" : "Update"}
             </Button>
           </div>
