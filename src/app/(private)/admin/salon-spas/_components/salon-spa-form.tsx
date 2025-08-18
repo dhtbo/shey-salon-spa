@@ -30,6 +30,7 @@ import toast from "react-hot-toast";
 import useUsersGlobalStore, {
   IUsersGlobalStore,
 } from "@/store/users-global-store";
+import LocationSelection from "./location-selection";
 
 interface SalonSpaFormProps {
   initialValues?: any;
@@ -132,7 +133,7 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
       Object.keys(initialValues).forEach((key: any) => {
         form.setValue(key, initialValues[key]);
       });
-      
+
       form.setValue("zip", initialValues.zip.toString());
     }
   }, [initialValues, form]);
@@ -453,10 +454,21 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
           </div>
 
           {/* Location Name */}
-          {/* 后面完善地图选点功能 */}
-          {/* <div className="p-5 border border-gray-300 rounded-md flex flex-col gap-5">
+          <div className="p-5 border border-gray-300 rounded-md flex flex-col gap-5">
             <h1>Location</h1>
-          </div> */}
+            <LocationSelection
+              initialLocation={{
+                latitude: form.watch("latitude") || "",
+                longitude: form.watch("longitude") || "",
+                locationName: form.watch("location_name") || "",
+              }}
+              onLocationChange={(loc) => {
+                form.setValue("latitude", loc.latitude);
+                form.setValue("longitude", loc.longitude);
+                form.setValue("location_name", loc.locationName || "");
+              }}
+            />
+          </div>
 
           <div className="flex justify-end gap-5">
             <Button
