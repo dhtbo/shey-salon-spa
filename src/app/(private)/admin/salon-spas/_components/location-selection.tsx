@@ -6,7 +6,7 @@ import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
-import OSM from "ol/source/OSM";
+import XYZ from "ol/source/XYZ";
 import VectorSource from "ol/source/Vector";
 import { fromLonLat, toLonLat } from "ol/proj";
 import Feature from "ol/Feature";
@@ -43,6 +43,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
 }) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<Map | null>(null);
   const markerLayerRef = useRef<VectorLayer<VectorSource> | null>(null);
@@ -51,19 +52,89 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
   const debounceTimerRef = useRef<number | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
   const reverseAbortRef = useRef<AbortController | null>(null);
+  const ipLocationAbortRef = useRef<AbortController | null>(null);
+
+  // 获取用户IP地理位置
+  const getUserLocationByIP = useCallback(async (): Promise<{lat: number, lon: number} | null> => {
+    try {
+      ipLocationAbortRef.current?.abort();
+      ipLocationAbortRef.current = new AbortController();
+      const response = await fetch('https://ipapi.co/json/', {
+        signal: ipLocationAbortRef.current.signal
+      });
+      const data = await response.json();
+      if (data.latitude && data.longitude) {
+        return {
+          lat: parseFloat(data.latitude),
+          lon: parseFloat(data.longitude)
+        };
+      }
+    } catch (_) {
+      // 忽略IP定位失败
+    }
+    return null;
+  }, []);
+
+  // 提取重复的逆地理编码逻辑
+  const reverseGeocode = useCallback(async (lat: number, lon: number): Promise<string> => {
+    try {
+      reverseAbortRef.current?.abort();
+      reverseAbortRef.current = new AbortController();
+      const reverseUrl = `https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}`;
+      const res = await fetch(reverseUrl, { 
+        headers: { Accept: "application/json" }, 
+        signal: reverseAbortRef.current.signal 
+      });
+      const data = await res.json();
+      const feature: PhotonFeature | null = Array.isArray(data?.features) 
+        ? (data.features[0] as PhotonFeature) 
+        : null;
+      if (feature) {
+        const props = feature.properties || {};
+        const parts = [
+          props.name,
+          props.street,
+          props.city,
+          props.state,
+          props.country,
+        ].filter(Boolean);
+        return parts.join(", ");
+      }
+    } catch (_) {
+      // 忽略逆地理编码失败
+    }
+    return "";
+  }, []);
+
+  // 获取用户IP地理位置
+  useEffect(() => {
+    // 如果没有初始位置，尝试通过IP获取用户位置
+    if (!initialLocation?.latitude || !initialLocation?.longitude) {
+      getUserLocationByIP().then(location => {
+        if (location) {
+          setUserLocation(location);
+        }
+      });
+    }
+  }, [initialLocation?.latitude, initialLocation?.longitude, getUserLocationByIP]);
 
   const defaultCenter = useMemo(() => {
-    // 中国大致经纬度中心: [104.1954, 35.8617]
-    const fallbackLon = 104.1954;
-    const fallbackLat = 35.8617;
-    const lon = initialLocation?.longitude
-      ? parseFloat(initialLocation.longitude)
-      : fallbackLon;
-    const lat = initialLocation?.latitude
-      ? parseFloat(initialLocation.latitude)
-      : fallbackLat;
+    // 优先级：初始位置 > IP位置 > 中国大致经纬度中心
+    let lon = 104.1954; // 中国大致经纬度中心
+    let lat = 35.8617;
+    
+    if (initialLocation?.longitude && initialLocation?.latitude) {
+      // 使用传入的初始位置
+      lon = parseFloat(initialLocation.longitude);
+      lat = parseFloat(initialLocation.latitude);
+    } else if (userLocation) {
+      // 使用IP定位获取的位置
+      lon = userLocation.lon;
+      lat = userLocation.lat;
+    }
+    
     return fromLonLat([lon, lat]);
-  }, [initialLocation?.longitude, initialLocation?.latitude]);
+  }, [initialLocation?.longitude, initialLocation?.latitude, userLocation]);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -72,12 +143,15 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
       target: mapContainerRef.current,
       layers: [
         new TileLayer({
-          source: new OSM(),
+          source: new XYZ({
+            url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png',
+            crossOrigin: 'anonymous'
+          }),
         }),
       ],
       view: new View({
         center: defaultCenter,
-        zoom: initialLocation?.latitude && initialLocation?.longitude ? 14 : 4,
+        zoom: (initialLocation?.latitude && initialLocation?.longitude) || userLocation ? 14 : 4,
       }),
     });
 
@@ -86,27 +160,10 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
       updateMarker(map, evt.coordinate);
       (async () => {
         let name = query || initialLocation?.locationName || "";
-        try {
-          reverseAbortRef.current?.abort();
-          reverseAbortRef.current = new AbortController();
-          const reverseUrl = `https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}`;
-          const res = await fetch(reverseUrl, { headers: { Accept: "application/json" }, signal: reverseAbortRef.current.signal });
-          const data = await res.json();
-          const feature: PhotonFeature | null = Array.isArray(data?.features) ? (data.features[0] as PhotonFeature) : null;
-          if (feature) {
-            const props = feature.properties || {};
-            const parts = [
-              props.name,
-              props.street,
-              props.city,
-              props.state,
-              props.country,
-            ].filter(Boolean);
-            name = parts.join(", ") || name;
-            setQuery(name);
-          }
-        } catch (_) {
-          // 忽略逆地理编码失败，使用现有 name
+        const reverseName = await reverseGeocode(lat, lon);
+        if (reverseName) {
+          name = reverseName;
+          setQuery(name);
         }
         const selected: SelectedLocation = {
           latitude: lat.toFixed(6),
@@ -128,23 +185,9 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
       } else {
         // 无初始名称时，逆地理获取一次名称
         (async () => {
-          try {
-            const [lon, lat] = toLonLat(defaultCenter);
-            reverseAbortRef.current?.abort();
-            reverseAbortRef.current = new AbortController();
-            const reverseUrl = `https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}`;
-            const res = await fetch(reverseUrl, { headers: { Accept: "application/json" }, signal: reverseAbortRef.current.signal });
-            const data = await res.json();
-            const feature: PhotonFeature | null = Array.isArray(data?.features) ? (data.features[0] as PhotonFeature) : null;
-            if (feature) {
-              const props = feature.properties || {};
-              const parts = [props.name, props.street, props.city, props.state, props.country].filter(Boolean);
-              const name = parts.join(", ");
-              if (name) setQuery(name);
-            }
-          } catch (_) {
-            // 忽略失败
-          }
+          const [lon, lat] = toLonLat(defaultCenter);
+          const name = await reverseGeocode(lat, lon);
+          if (name) setQuery(name);
         })();
       }
     }
@@ -157,7 +200,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultCenter, userLocation]);
 
   // 监听表单传入的初始坐标变化（例如编辑页异步载入数据后）
   useEffect(() => {
@@ -174,22 +217,8 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
       setQuery(initialLocation.locationName);
     } else {
       (async () => {
-        try {
-          reverseAbortRef.current?.abort();
-          reverseAbortRef.current = new AbortController();
-          const reverseUrl = `https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}`;
-          const res = await fetch(reverseUrl, { headers: { Accept: "application/json" }, signal: reverseAbortRef.current.signal });
-          const data = await res.json();
-          const feature: PhotonFeature | null = Array.isArray(data?.features) ? (data.features[0] as PhotonFeature) : null;
-          if (feature) {
-            const props = feature.properties || {};
-            const parts = [props.name, props.street, props.city, props.state, props.country].filter(Boolean);
-            const name = parts.join(", ");
-            if (name) setQuery(name);
-          }
-        } catch (_) {
-          // 忽略失败
-        }
+        const name = await reverseGeocode(lat, lon);
+        if (name) setQuery(name);
       })();
     }
   }, [initialLocation?.latitude, initialLocation?.longitude, initialLocation?.locationName]);
@@ -242,7 +271,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
       markerFeatureRef.current = new Feature({ geometry: new Point(coordinate) });
       markerFeatureRef.current.setStyle(
         new Style({
-          image: new Icon({ anchor: [0.5, 1], src: "https://openlayers.org/en/latest/examples/data/icon.png" }),
+          image: new Icon({ anchor: [0.5, 1], src: "https://www.openlayers.vip/icons/marker.png" }),
         })
       );
       vectorSourceRef.current.addFeature(markerFeatureRef.current);
