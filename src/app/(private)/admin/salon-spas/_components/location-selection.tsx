@@ -271,7 +271,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
       markerFeatureRef.current = new Feature({ geometry: new Point(coordinate) });
       markerFeatureRef.current.setStyle(
         new Style({
-          image: new Icon({ anchor: [0.5, 1], src: "https://www.openlayers.vip/icons/marker.png" }),
+          image: new Icon({ anchor: [0.5, 1], src: "https://openlayers.org/en/latest/examples/data/icon.png" }),
         })
       );
       vectorSourceRef.current.addFeature(markerFeatureRef.current);
