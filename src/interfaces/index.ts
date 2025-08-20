@@ -9,7 +9,7 @@ export interface IUser {
     updated_at: string;
 }
 
-export interface ISaon_Spa {
+export interface ISalon_Spa {
     id: number;
     name: string;
     description: string;
@@ -31,4 +31,21 @@ export interface ISaon_Spa {
     longitude: number;
     created_at: string;
     updated_at: string;
+    offer_status: string;
+
+}
+
+export interface IAppointment {
+    id: number;
+    user_id: number;
+    salon_spa_id: number;
+    date: string;
+    time: string;
+    status: 'booked' | 'completed' | 'canceled';
+    created_at: string;
+    updated_at: string;
+
+    // 运行时属性
+    user_data: IUser;
+    salon_spa_data: ISalon_Spa;
 }

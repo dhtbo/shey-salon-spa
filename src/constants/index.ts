@@ -7,3 +7,9 @@ export const workingDays = [
   { value: "saturday", label: "Saturday" },
   { value: "sunday", label: "Sunday" },
 ];
+
+// 添加 appointment 状态
+export const appointmentStatus = [
+  { value: "booked", label: "Booked" },
+  { value: "canceled", label: "Canceled" },
+]

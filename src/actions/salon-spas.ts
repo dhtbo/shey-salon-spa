@@ -1,7 +1,7 @@
 "use server";
 
 import supabase from "@/config/supabase-config";
-import { ISaon_Spa } from "@/interfaces";
+import { ISalon_Spa } from "@/interfaces";
 
 export const creatNewSalonSpa = async (payload: any) => {
   try {
@@ -116,3 +116,22 @@ export const deleteSalonSpaById = async (id: number) => {
     message: "删除成功",
   };
 };
+
+
+export const getAllSalonSpas = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("salon_spas")
+      .select("*");
+    if (error) throw error;
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}

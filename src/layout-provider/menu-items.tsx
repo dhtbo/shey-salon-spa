@@ -38,7 +38,7 @@ function MenuItems({ openMenuItems, setOpenMenuItems}: MenuItemsProps) {
     let userMenuItems = [
         { title: "Dashboard", path: "/user/dashboard", icon: <LayoutDashboard size={13} /> },
         { title: "Schedule Appointment", path: "/user/schedule-appointment", icon: <Calendar size={13} /> },
-        { title: "My Appointments", path: "/user/my-appointments", icon: <List size={13} /> },
+        { title: "My Appointments", path: "/user/appointments", icon: <List size={13} /> },
         { title: "Profile", path: `/user/profile`, icon: <User2 size={13} /> },
     ]
     let adminMenuItems = [
