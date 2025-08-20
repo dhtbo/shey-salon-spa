@@ -57,7 +57,7 @@ function userAppointmentsList() {
       setLoading(true)
       const response: any = await updateAppointmentStatus(appointmentId, status)
       if (!response.success) throw new Error(response.message)
-      
+
       toast.success(response.message)
       const updatedAppointments:any = appointments.map((appointment) => {
         if (appointment.id === appointmentId) {
@@ -116,7 +116,6 @@ function userAppointmentsList() {
                   <select
                     value={appointment.status}
                     className={`border border-gray-300 rounded-md p-1 ${appointment.status === "canceled" ? "opacity-50 pointer-none:" : ""}`}
-
                     onChange={(e) => handleStatusChange(appointment.id, e.target.value)}
                     disabled={dayjs(appointment.date).isBefore(dayjs(),"day") || appointment.status === "canceled"}
                   >

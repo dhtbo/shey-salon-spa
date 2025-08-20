@@ -11,6 +11,7 @@ export interface IUser {
 
 export interface ISalon_Spa {
     id: number;
+    owner_id: number;
     name: string;
     description: string;
     address: string;
@@ -32,7 +33,6 @@ export interface ISalon_Spa {
     created_at: string;
     updated_at: string;
     offer_status: string;
-
 }
 
 export interface IAppointment {
