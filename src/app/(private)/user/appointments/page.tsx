@@ -39,7 +39,7 @@ function userAppointmentsList() {
         toast.error(response.message)
       }
     } catch (error) {
-      toast.error("Error fetching appointments")
+      toast.error("获取预约信息失败")
       setLoading(false)
     } finally {
       setLoading(false)
@@ -67,7 +67,7 @@ function userAppointmentsList() {
       })
       setAppointments(updatedAppointments)
     } catch (error) {
-      toast.error("Error updating appointment status")
+      toast.error("更新预约状态失败")
     } finally {
       setLoading(false)
     }
@@ -77,22 +77,22 @@ function userAppointmentsList() {
 
   const columns = [
     "ID",
-    "Salon/Spa Name",
-    "Date",
-    "Time",
-    "Booked At",
-    "Status",
+    "沙龙/水疗中心",
+    "日期",
+    "时间",
+    "预约时间",
+    "状态",
   ]
 
 
   return (
     <div>
-      <PageTitle title='My Appointments' />
+      <PageTitle title='我的预约' />
 
       {loading && <Loader />}
 
       {!loading && appointments.length === 0 && (
-        <ErrorMessage error="No appointments found" />
+        <ErrorMessage error="暂无预约记录" />
       )}
 
       {!loading && appointments.length > 0 && (

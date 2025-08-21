@@ -44,16 +44,16 @@ function SalonSpasList() {
   };
 
   const handleDelete = async (id: number) => {
-    const confirmed = window.confirm("Are you sure you want to delete this salon spa?");
+    const confirmed = window.confirm("确定要删除这个沙龙吗？");
     if (!confirmed) return;
     try {
       setLoading(true);
       const res = await deleteSalonSpaById(id);
       if (!res.success) throw new Error(res.message);
-      toast.success("Deleted successfully");
+      toast.success("删除成功");
       fetchSalonSpas();
     } catch (error: any) {
-      toast.error(error.message || "Delete failed");
+      toast.error(error.message || "删除失败");
     } finally {
       setLoading(false);
     }
@@ -66,24 +66,24 @@ function SalonSpasList() {
   }, [user]);
 
   const columns = [
-    "Name",
-    "Description",
-    "City",
-    "State",
-    "Zip",
-    "Min_service_price",
-    "Max_service_price",
-    "Offer_status",
-    "created_at",
-    "Actions",
+    "名称",
+    "描述",
+    "城市",
+    "省份",
+    "邮编",
+    "最低服务价格",
+    "最高服务价格",
+    "营业状态",
+    "创建时间",
+    "操作",
   ];
 
   return (
     <div>
       <div className="flex justify-between items-center mb-5">
-        <PageTitle title="Salon Spas" />
+        <PageTitle title="沙龙管理" />
         <Button>
-          <Link href="/admin/salon-spas/add">Add New Salon Spa</Link>
+          <Link href="/admin/salon-spas/add">添加新沙龙</Link>
         </Button>
       </div>
 

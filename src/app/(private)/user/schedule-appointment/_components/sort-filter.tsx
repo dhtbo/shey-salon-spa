@@ -24,11 +24,11 @@ type SortFilterProps = {
 };
 
 const sortFilterOptions = [
-  { value: "all" as const, label: "All (全部)" },
-  { value: "nearby" as const, label: "Nearby (附近)" },
-  { value: "price_low_to_high" as const, label: "Price: Low to high (价格从低到高)" },
-  { value: "price_high_to_low" as const, label: "Price: High to low (价格从高到低)" },
-  { value: "with_offers" as const, label: "With offers (有优惠活动)" },
+  { value: "all" as const, label: "全部" },
+  { value: "nearby" as const, label: "附近" },
+  { value: "price_low_to_high" as const, label: "价格从低到高" },
+  { value: "price_high_to_low" as const, label: "价格从高到低" },
+  { value: "with_offers" as const, label: "有优惠活动" },
 ];
 
 const SortFilter: React.FC<SortFilterProps> = ({
@@ -41,7 +41,7 @@ const SortFilter: React.FC<SortFilterProps> = ({
       <Filter className="h-4 w-4 text-gray-500" />
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger className="w-[280px]">
-          <SelectValue placeholder="Sort/Filter" />
+          <SelectValue placeholder="排序/筛选" />
         </SelectTrigger>
         <SelectContent>
           {sortFilterOptions.map((option) => (

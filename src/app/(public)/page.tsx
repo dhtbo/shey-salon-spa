@@ -10,16 +10,16 @@ function Homepage() {
         <h1 className='text-2xl font-bold'>S.H.E.Y</h1>
 
         <Button>
-          <Link href="/login">Login</Link>
+          <Link href="/login">登录</Link>
         </Button>
       </div>
 
       <div className='bg-white mt-20 lg:grid-cols-2 grid-cols-1 px-20 min-h-[70vh] items-center grid gap-10'>
         <div className='col-span-1'>
           <div className='flex flex-col gap-5'>
-            <h1 className='text-2xl font-bold!'>Welcome to S.H.E.Y</h1>
-            <p className='text-sm'>We are a salon and spa in the heart of the city.</p>
-            <Button className='w-max'>Book Now</Button>
+            <h1 className='text-2xl font-bold!'>欢迎来到 S.H.E.Y</h1>
+            <p className='text-sm'>我们是位于市中心的专业美容美发沙龙和水疗中心。</p>
+            <Button className='w-max'>立即预约</Button>
           </div>
         </div>
         <div className='col-span-1 flex justify-end items-center'>

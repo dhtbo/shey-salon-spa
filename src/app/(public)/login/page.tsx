@@ -67,7 +67,7 @@ function LoginPage() {
     return (
         <div className='auth-bg'>
             <div className='bg-white p-5 rounded-sm w-[400px] '>
-                <h1 className='text-xl font-bold! text-gray-600'>Login to your account</h1>
+                <h1 className='text-xl font-bold! text-gray-600'>登录您的账户</h1>
                 <hr className='my-7 border-t border-gray-300' />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -77,7 +77,7 @@ function LoginPage() {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel>邮箱</FormLabel>
                                     <FormControl>
                                         <Input placeholder="" {...field} />
                                     </FormControl>
@@ -91,7 +91,7 @@ function LoginPage() {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>密码</FormLabel>
                                     <FormControl>
                                         <Input placeholder=""
                                             type='password'
@@ -108,7 +108,7 @@ function LoginPage() {
                             name="role"
                             render={({ field }) => (
                                 <FormItem className="space-y-3">
-                                    <FormLabel>Role</FormLabel>
+                                    <FormLabel>角色</FormLabel>
                                     <FormControl>
                                         <RadioGroup
                                             onValueChange={field.onChange}
@@ -120,7 +120,7 @@ function LoginPage() {
                                                     <RadioGroupItem value="user" />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
-                                                    User
+                                                    用户
                                                 </FormLabel>
                                             </FormItem>
                                             <FormItem className="flex items-center space-x-3 space-y-0">
@@ -128,7 +128,7 @@ function LoginPage() {
                                                     <RadioGroupItem value="admin" />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
-                                                    Admin
+                                                    管理员
                                                 </FormLabel>
                                             </FormItem>
                                         </RadioGroup>
@@ -139,10 +139,10 @@ function LoginPage() {
                         />
                         <div className='flex justify-between items-center'>
                             <div className='flex gap-5 text-sm'>
-                                Don't have an account?
-                                <Link href="/register" className='underline'>Register</Link>
+                                还没有账户？
+                                <Link href="/register" className='underline'>注册</Link>
                             </div>
-                            <Button disabled={loading} type="submit">Submit</Button>
+                            <Button disabled={loading} type="submit">登录</Button>
                         </div>
                     </form>
                 </Form>

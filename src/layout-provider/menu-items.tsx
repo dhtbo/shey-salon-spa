@@ -28,7 +28,7 @@ function MenuItems({ openMenuItems, setOpenMenuItems}: MenuItemsProps) {
             Cookie.remove('token')
             Cookie.remove('role')
             router.push('/login')
-            toast.success('Logout successfully')
+            toast.success('退出登录成功')
         } catch (error: any) {
             toast.error(error.message)
         }
@@ -36,16 +36,16 @@ function MenuItems({ openMenuItems, setOpenMenuItems}: MenuItemsProps) {
 
 
     let userMenuItems = [
-        { title: "Dashboard", path: "/user/dashboard", icon: <LayoutDashboard size={13} /> },
-        { title: "Schedule Appointment", path: "/user/schedule-appointment", icon: <Calendar size={13} /> },
-        { title: "My Appointments", path: "/user/appointments", icon: <List size={13} /> },
-        { title: "Profile", path: `/user/profile`, icon: <User2 size={13} /> },
+        { title: "仪表板", path: "/user/dashboard", icon: <LayoutDashboard size={13} /> },
+        { title: "预约服务", path: "/user/schedule-appointment", icon: <Calendar size={13} /> },
+        { title: "我的预约", path: "/user/appointments", icon: <List size={13} /> },
+        { title: "个人资料", path: `/user/profile`, icon: <User2 size={13} /> },
     ]
     let adminMenuItems = [
-        { title: "Dashboard", path: "/admin/dashboard", icon: <LayoutDashboard size={13} /> },
-        { title: "Salon Spas", path: "/admin/salon-spas", icon: <List size={13} /> },
-        { title: "Appointments", path: "/admin/appointments", icon: <Calendar size={13} /> },
-        { title: "Settings", path: "/admin/settings", icon: <Layout size={13} /> },
+        { title: "仪表板", path: "/admin/dashboard", icon: <LayoutDashboard size={13} /> },
+        { title: "沙龙管理", path: "/admin/salon-spas", icon: <List size={13} /> },
+        { title: "预约管理", path: "/admin/appointments", icon: <Calendar size={13} /> },
+        { title: "系统设置", path: "/admin/settings", icon: <Layout size={13} /> },
     ]
 
     const menuItems = user?.role === 'admin' ? adminMenuItems : userMenuItems
@@ -57,7 +57,7 @@ function MenuItems({ openMenuItems, setOpenMenuItems}: MenuItemsProps) {
         >
             <SheetContent>
                 <SheetHeader>
-                    <SheetTitle>Menu</SheetTitle>
+                    <SheetTitle>菜单</SheetTitle>
                 </SheetHeader>
                 <div className='flex flex-col gap-7 mt-20 px-7'>
                     {menuItems.map((item) => (
@@ -78,7 +78,7 @@ function MenuItems({ openMenuItems, setOpenMenuItems}: MenuItemsProps) {
                     ))}
                     <Button className='w-full justify-start rounded-md cursor-pointer'
                         onClick={onLogout}>
-                        Logout
+                        退出登录
                     </Button>
                 </div>
             </SheetContent>

@@ -69,7 +69,7 @@ function RegisterPage() {
     return (
         <div className='auth-bg'>
             <div className='bg-white p-5 rounded-sm w-[400px] '>
-                <h1 className='text-xl font-bold! text-gray-600'>Create a new account</h1>
+                <h1 className='text-xl font-bold! text-gray-600'>创建新账户</h1>
                 <hr className='my-7 border-t border-gray-300' />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -79,7 +79,7 @@ function RegisterPage() {
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Username</FormLabel>
+                                    <FormLabel>用户名</FormLabel>
                                     <FormControl>
                                         <Input placeholder="请输入用户名" {...field} />
                                     </FormControl>
@@ -94,7 +94,7 @@ function RegisterPage() {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel>邮箱</FormLabel>
                                     <FormControl>
                                         <Input placeholder="请输入邮箱" type="email" {...field} />
                                     </FormControl>
@@ -109,7 +109,7 @@ function RegisterPage() {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>密码</FormLabel>
                                     <FormControl>
                                         <Input placeholder="请输入密码" type='password' {...field} />
                                     </FormControl>
@@ -124,7 +124,7 @@ function RegisterPage() {
                             name="confirmPassword"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Confirm Password</FormLabel>
+                                    <FormLabel>确认密码</FormLabel>
                                     <FormControl>
                                         <Input placeholder="请确认密码" type='password' {...field} />
                                     </FormControl>
@@ -139,7 +139,7 @@ function RegisterPage() {
                             name="role"
                             render={({ field }) => (
                                 <FormItem className="space-y-3">
-                                    <FormLabel>Role</FormLabel>
+                                    <FormLabel>角色</FormLabel>
                                     <FormControl>
                                         <RadioGroup
                                             onValueChange={field.onChange}
@@ -150,13 +150,13 @@ function RegisterPage() {
                                                 <FormControl>
                                                     <RadioGroupItem value="user" />
                                                 </FormControl>
-                                                <FormLabel className="font-normal">User</FormLabel>
+                                                <FormLabel className="font-normal">用户</FormLabel>
                                             </FormItem>
                                             <FormItem className="flex items-center space-x-3 space-y-0">
                                                 <FormControl>
                                                     <RadioGroupItem value="admin" />
                                                 </FormControl>
-                                                <FormLabel className="font-normal">Admin</FormLabel>
+                                                <FormLabel className="font-normal">管理员</FormLabel>
                                             </FormItem>
                                         </RadioGroup>
                                     </FormControl>
@@ -168,10 +168,10 @@ function RegisterPage() {
                         {/* 提交按钮和登录链接 */}
                         <div className='flex justify-between items-center'>
                             <div className='flex gap-5 text-sm'>
-                                Already have an account?
-                                <Link href="/login" className='underline'>Login</Link>
+                                已有账户？
+                                <Link href="/login" className='underline'>登录</Link>
                             </div>
-                            <Button type="submit" disabled={loading}>Register</Button>
+                            <Button type="submit" disabled={loading}>注册</Button>
 
                         </div>
                     </form>

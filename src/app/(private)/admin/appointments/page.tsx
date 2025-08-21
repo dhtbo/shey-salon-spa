@@ -53,7 +53,7 @@ function ownerAppointmentsList() {
         toast.error(response.message);
       }
     } catch (error) {
-      toast.error("Error fetching appointments");
+      toast.error("获取预约信息失败");
       setLoading(false);
     } finally {
       setLoading(false);
@@ -108,7 +108,7 @@ function ownerAppointmentsList() {
       });
       setAppointments(updatedAppointments);
     } catch (error) {
-      toast.error("Error updating appointment status");
+      toast.error("更新预约状态失败");
     } finally {
       setLoading(false);
     }
@@ -116,17 +116,17 @@ function ownerAppointmentsList() {
 
   const columns = [
     "ID",
-    "Salon/Spa Name",
-    "Customer Name",
-    "Date",
-    "Time",
-    "Booked At",
-    "Status",
+    "沙龙/水疗中心",
+    "客户姓名",
+    "日期",
+    "时间",
+    "预约时间",
+    "状态",
   ];
 
   return (
     <div>
-      <PageTitle title="Appointments" />
+      <PageTitle title="预约管理" />
 
       {loading && <Loader />}
 
@@ -206,7 +206,7 @@ function ownerAppointmentsList() {
                           {item.label}
                         </option>
                       ))}
-                      <option value="completed">Completed</option>
+                      <option value="completed">已完成</option>
                     </select>
                   </TableCell>
                 </TableRow>

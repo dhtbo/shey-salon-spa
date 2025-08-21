@@ -5,7 +5,7 @@ import SalonSpaForm from '../_components/salon-spa-form'
 function AddSalonSpa() {
   return (
     <div>
-      <PageTitle title="Add New Salon Spa" />
+      <PageTitle title="添加新沙龙" />
 
       <SalonSpaForm formType="add" />
 

@@ -54,42 +54,42 @@ function DashboardPage() {
 
   const statsCards = [
     {
-      title: 'Total Bookings',
+      title: '总预约数',
       value: stats?.totalBookings || 0,
       icon: Calendar,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      description: '总预约数'
+      description: '所有预约的总数量'
     },
     {
-      title: 'Canceled Bookings',
+      title: '已取消预约',
       value: stats?.canceledBookings || 0,
       icon: CalendarX,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
-      description: '已取消预约数'
+      description: '已取消的预约数量'
     },
     {
-      title: 'Completed Bookings',
+      title: '已完成预约',
       value: stats?.completedBookings || 0,
       icon: CheckCircle,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
-      description: '已完成预约数'
+      description: '已完成的预约数量'
     },
     {
-      title: 'Upcoming Bookings',
+      title: '即将到来预约',
       value: stats?.upcomingBookings || 0,
       icon: Clock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      description: '即将到来预约数'
+      description: '即将到来的预约数量'
     }
   ]
 
   return (
     <div className="space-y-6">
-      <PageTitle title="Admin Dashboard" />
+      <PageTitle title="管理员仪表板" />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsCards.map((card, index) => {

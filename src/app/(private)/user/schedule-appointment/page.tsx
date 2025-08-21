@@ -132,7 +132,7 @@ function ScheduleAppointment() {
   return (
     <div>
       <div className='flex justify-between items-center mb-6'>
-        <PageTitle title="Schedule Appointment" />
+        <PageTitle title="预约服务" />
       </div>
 
       {/* 搜索和筛选区域 */}
@@ -140,7 +140,7 @@ function ScheduleAppointment() {
         <div className='flex-1'>
           <LocationSearch 
             onLocationChange={handleLocationChange}
-            placeholder="Search for a location..."
+            placeholder="搜索位置..."
           />
         </div>
         <div className='md:w-auto'>
@@ -191,7 +191,7 @@ function ScheduleAppointment() {
 
                 <div className='mt-5'>
                   <span className='text-xs font-semibold text-gray-800'>
-                    Minimum Price: ${salonSpa.min_service_price}
+                    最低价格: ¥{salonSpa.min_service_price}
                   </span>
                 </div>
               </div>
@@ -202,14 +202,14 @@ function ScheduleAppointment() {
 
       {!loading && filteredAndSortedSalonSpas?.length === 0 && salonSpas?.length > 0 && (
         <div className='text-center py-8 text-gray-500'>
-          <p>No salon spas found matching your criteria.</p>
-          <p className='text-sm mt-2'>Try adjusting your search location or filter options.</p>
+          <p>未找到符合条件的沙龙。</p>
+          <p className='text-sm mt-2'>请尝试调整搜索位置或筛选条件。</p>
         </div>
       )}
 
       {!loading && salonSpas?.length === 0 && (
         <div className='text-center py-8 text-gray-500'>
-          <p>No salon spas available at the moment.</p>
+          <p>暂无可用的沙龙。</p>
         </div>
       )}
 

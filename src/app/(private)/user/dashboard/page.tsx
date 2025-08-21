@@ -62,36 +62,36 @@ function UserDashboardPage() {
 
   const statsCards = [
     {
-      title: 'My Total Bookings',
+      title: '我的总预约数',
       value: stats?.totalBookings || 0,
       icon: Calendar,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      description: '我的总预约数'
+      description: '我的所有预约总数'
     },
     {
-      title: 'My Canceled Bookings',
+      title: '我的已取消预约',
       value: stats?.canceledBookings || 0,
       icon: CalendarX,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
-      description: '我的已取消预约数'
+      description: '我已取消的预约数量'
     },
     {
-      title: 'My Completed Bookings',
+      title: '我的已完成预约',
       value: stats?.completedBookings || 0,
       icon: CheckCircle,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
-      description: '我的已完成预约数'
+      description: '我已完成的预约数量'
     },
     {
-      title: 'My Upcoming Bookings',
+      title: '我的即将到来预约',
       value: stats?.upcomingBookings || 0,
       icon: Clock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      description: '我的即将到来预约数'
+      description: '我即将到来的预约数量'
     }
   ]
 
