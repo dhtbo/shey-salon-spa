@@ -46,6 +46,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
   const searchAbortRef = useRef<AbortController | null>(null);
   const reverseAbortRef = useRef<AbortController | null>(null);
   const ipLocationAbortRef = useRef<AbortController | null>(null);
+  const justSelectedRef = useRef(false);
 
   // 加载高德地图JS SDK（用于地图显示）
   const loadAmapAPI = useCallback(async (): Promise<void> => {
@@ -302,7 +303,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
   // 高德地图输入联想搜索
   useEffect(() => {
     if (debounceTimerRef.current) window.clearTimeout(debounceTimerRef.current);
-    if (!query || query.trim().length < 1 || !mapLoaded || !window.AMap || isProgrammaticUpdate) {
+    if (!query || query.trim().length < 1 || !mapLoaded || !window.AMap || isProgrammaticUpdate || justSelectedRef.current) {
       setSuggestions([]);
       if (isProgrammaticUpdate) {
         setIsProgrammaticUpdate(false); // 重置标志
@@ -353,11 +354,18 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
     const lat = Number(loc.lat);
     const name: string = loc.display_name || "";
     
-    // 更新输入框内容
-    setQuery(name);
-    // 隐藏搜索建议
+    // 设置选择标志，防止重复弹出
+    justSelectedRef.current = true;
+    
+    // 设置程序化更新标志，防止触发搜索
+    setIsProgrammaticUpdate(true);
+    
+    // 立即隐藏搜索建议
     setSuggestions([]);
     setSelectedIndex(-1);
+    
+    // 更新输入框内容
+    setQuery(name);
     
     if (mapInstanceRef.current && window.AMap) {
       // 更新地图标记
@@ -372,9 +380,12 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
         longitude: lon.toFixed(6),
         locationName: name,
       });
-      
-
     }
+    
+    // 短暂延迟后重置选择标志
+    setTimeout(() => {
+      justSelectedRef.current = false;
+    }, 200);
   }, [updateMarker, onLocationChange]);
 
   // 处理键盘导航
@@ -416,17 +427,25 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({
           type="text"
           value={query}
           onChange={(e) => {
-            setQuery(e.target.value);
-            setSelectedIndex(-1); // 重置选中索引
-          }}
+             if (isProgrammaticUpdate) {
+               // 程序化更新时只更新query值，不触发搜索
+               setQuery(e.target.value);
+             } else {
+               // 用户输入时正常处理
+               setQuery(e.target.value);
+               setSelectedIndex(-1);
+             }
+           }}
           onKeyDown={handleKeyDown}
           onBlur={() => {
-            // 延迟隐藏，以便点击建议项时能正常触发
-            setTimeout(() => {
-              setSuggestions([]);
-              setSelectedIndex(-1);
-            }, 150);
-          }}
+             // 延迟隐藏建议列表，以便点击建议项时能正常触发
+             setTimeout(() => {
+               if (!isProgrammaticUpdate && !justSelectedRef.current) {
+                 setSuggestions([]);
+                 setSelectedIndex(-1);
+               }
+             }, 150);
+           }}
           placeholder="输入地址搜索位置..."
           className="w-full"
           autoComplete="off"

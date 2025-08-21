@@ -86,7 +86,7 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
       max_service_price: 0,
       offer_status: "inactive",
       slot_duration: 30,
-      max_booking_per_slot: 1,
+      max_bookings_per_slot: 1,
       location_name: "",
       latitude: "",
       longitude: "",
@@ -245,9 +245,10 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
                       type="number"
                       {...field}
                       onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
                         form.setValue(
                           "min_service_price",
-                          parseInt(e.target.value)
+                          value
                         );
                       }}
                     />
@@ -269,9 +270,10 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
                       type="number"
                       {...field}
                       onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
                         form.setValue(
                           "max_service_price",
-                          parseInt(e.target.value)
+                          value
                         );
                       }}
                     />
@@ -414,9 +416,10 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
                         placeholder=""
                         {...field}
                         onChange={(e) => {
+                          const value = e.target.value === '' ? 30 : parseInt(e.target.value) || 30;
                           form.setValue(
                             "slot_duration",
-                            parseInt(e.target.value)
+                            value
                           );
                         }}
                       />
@@ -439,9 +442,10 @@ function SalonSpaForm({ initialValues, formType }: SalonSpaFormProps) {
                         placeholder=""
                         {...field}
                         onChange={(e) => {
+                          const value = e.target.value === '' ? 1 : parseInt(e.target.value) || 1;
                           form.setValue(
                             "max_bookings_per_slot",
-                            parseInt(e.target.value)
+                            value
                           );
                         }}
                       />
