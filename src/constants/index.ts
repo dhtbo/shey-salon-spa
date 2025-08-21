@@ -10,6 +10,6 @@ export const workingDays = [
 
 // 添加 appointment 状态
 export const appointmentStatus = [
-  { value: "booked", label: "已预约" },
-  { value: "canceled", label: "已取消" },
+  { value: "已预约", label: "已预约" },
+  { value: "已取消", label: "已取消" },
 ]

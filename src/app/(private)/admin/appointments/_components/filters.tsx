@@ -65,7 +65,7 @@ function Filters({
               {status.label}
             </option>
           ))}
-          <option value="completed">已完成</option>
+          <option value="已完成">已完成</option>
         </select>
       </div>
 
