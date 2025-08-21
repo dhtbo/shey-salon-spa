@@ -42,6 +42,7 @@ function Checkout({ salonSpa }: { salonSpa: ISalon_Spa }) {
       const payload = {
         user_id: user?.id,
         salon_spa_id: salonSpa.id,
+        owner_id: salonSpa.owner_id,
         date: dayjs(date).format("YYYY-MM-DD"),
         time,
         status: "booked",

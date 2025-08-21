@@ -48,17 +48,37 @@ export const getAppointmentByUserid = async (userId: number) => {
   }
 }
 
-export const getAppointmentsByOwnerId = async (ownerId: number) => {
+export const getAppointmentsByOwnerId = async (ownerId: number, filters:{
+  status?: string | null,
+  date?: string | null,
+  salon_spa_Id?: number | null,
+}) => {
   try {
-    const { data, error } = await supabase
-      .from("appointments")
-      .select()
-      .eq("owner_id", ownerId)
-      .order("created_at", { ascending: false })
+    let qry = supabase
+    .from("appointments")
+    .select("*, salon_spas(id,name),user_profiles(id,name)")
+    .eq("owner_id", ownerId)
+    .order("created_at", { ascending: false })
+
+    if (filters.status) {
+      qry = qry.eq("status", filters.status)
+    }
+    if (filters.date) {
+      qry = qry.eq("date", filters.date)
+    }
+    if (filters.salon_spa_Id) {
+      qry = qry.eq("salon_spa_id", filters.salon_spa_Id)
+    }
+    
+    const { data, error } = await qry
     if (error) throw error
     return {
       success: true,
-      data: data,
+      data: data.map((item: any) => ({
+        ...item,
+        salon_spa_data: item.salon_spas,
+        user_profile_data: item.user_profiles,
+      })),
     }
   } catch (error: any) {
     return {

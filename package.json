@@ -27,7 +27,7 @@
     "next": "15.4.6",
     "ol": "^10.6.1",
     "react": "19.1.0",
-    "react-datepicker": "^8.6.0",
+    "react-datepicker": "^8.7.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
     "react-hot-toast": "^2.5.2",
