@@ -115,9 +115,9 @@ function userAppointmentsList() {
                 <TableCell>
                   <select
                     value={appointment.status}
-                    className={`border border-gray-300 rounded-md p-1 ${appointment.status === "canceled" ? "opacity-50 pointer-none:" : ""}`}
+                    className={`border border-gray-300 rounded-md p-1 ${appointment.status === "已取消" ? "opacity-50 pointer-none:" : ""}`}
                     onChange={(e) => handleStatusChange(appointment.id, e.target.value)}
-                    disabled={dayjs(appointment.date).isBefore(dayjs(),"day") || appointment.status === "canceled"}
+                    disabled={dayjs(appointment.date).isBefore(dayjs(),"day") || appointment.status === "已取消"}
                   >
                     {appointmentStatus.map((item) => (
                       <option key={item.value} value={item.value}>

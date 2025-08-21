@@ -186,7 +186,7 @@ function ownerAppointmentsList() {
                     <select
                       value={appointment.status}
                       className={`border border-gray-300 rounded-md p-1 ${
-                        appointment.status === "canceled"
+                        appointment.status === "已取消"
                           ? "opacity-50 pointer-none:"
                           : ""
                       }`}
@@ -198,7 +198,7 @@ function ownerAppointmentsList() {
                       }
                       disabled={
                         dayjs(appointment.date).isBefore(dayjs(), "day") ||
-                        appointment.status === "canceled"
+                        appointment.status === "已取消"
                       }
                     >
                       {appointmentStatus.map((item) => (

@@ -41,7 +41,7 @@ export interface IAppointment {
     salon_spa_id: number;
     date: string;
     time: string;
-    status: 'booked' | 'completed' | 'canceled';
+    status: '已预约' | '已完成' | '已取消';
     created_at: string;
     updated_at: string;
 
