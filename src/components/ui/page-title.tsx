@@ -1,10 +1,23 @@
 import React from 'react'
 
-function PageTitle({ title }: { title: string }) {
+interface PageTitleProps {
+    title: string
+    description?: string
+    className?: string
+}
+
+function PageTitle({ title, description, className = "" }: PageTitleProps) {
     return (
-        <h1 className="text-xl font-bold! text-gray-900">
-            {title}
-        </h1>
+        <div className={`mb-6 ${className}`}>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                {title}
+            </h1>
+            {description && (
+                <p className="text-sm text-gray-600">
+                    {description}
+                </p>
+            )}
+        </div>
     )
 }
 

@@ -124,40 +124,44 @@ function ownerAppointmentsList() {
     "状态",
   ];
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader />
+      </div>
+    )
+  }
+
   return (
-    <div>
+    <div className="space-y-6">
       <PageTitle title="预约管理" />
 
-      {loading && <Loader />}
+      <Filters
+        salonSpas={salonSpas}
+        selectedSalonSpa={selectedSalonSpa}
+        setSelectedSalonSpa={setSelectedSalonSpa}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+        onFilter={fetchData}
+        onClearFilter={() => {
+          setSelectedSalonSpa(null);
+          setSelectedDate(null);
+          setSelectedStatus(null);
+          setFilterCleared(true);
+        }}
+      />
 
-      {!loading && (
-        <Filters
-          salonSpas={salonSpas}
-          selectedSalonSpa={selectedSalonSpa}
-          setSelectedSalonSpa={setSelectedSalonSpa}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
-          onFilter={fetchData}
-          onClearFilter={() => {
-            setSelectedSalonSpa(null);
-            setSelectedDate(null);
-            setSelectedStatus(null);
-            setFilterCleared(true);
-          }}
-        />
-      )}
-
-      {!loading && appointments.length === 0 && (
-        <ErrorMessage error="No appointments found" />
-      )}
-
-      {!loading && appointments.length > 0 && (
-        <div>
+      {appointments.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500">暂无预约记录</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border">
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="bg-gray-100">
+              <TableRow className="bg-gray-50">
                 {columns.map((column) => (
                   <TableHead key={column}>{column}</TableHead>
                 ))}
@@ -165,30 +169,30 @@ function ownerAppointmentsList() {
             </TableHeader>
             <TableBody>
               {appointments.map((appointment) => (
-                <TableRow key={appointment.id} className="p-2">
-                  <TableCell>{appointment.id}</TableCell>
-                  <TableCell>
+                <TableRow key={appointment.id} className="hover:bg-gray-50">
+                  <TableCell className="font-medium">#{appointment.id}</TableCell>
+                  <TableCell className="font-medium">
                     {appointment.salon_spa_data?.name || "N/A"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium">
                     {appointment.user_profile_data?.name || "N/A"}
                   </TableCell>
                   <TableCell>
                     {dayjs(appointment.date).format("YYYY-MM-DD")}
                   </TableCell>
-                  <TableCell>{appointment.time}</TableCell>
-                  <TableCell>
-                    {dayjs(appointment.created_at).format(
-                      "YYYY-MM-DD HH:mm:ss"
-                    )}
+                  <TableCell className="font-medium">{appointment.time}</TableCell>
+                  <TableCell className="text-gray-500">
+                    {dayjs(appointment.created_at).format("YYYY-MM-DD HH:mm")}
                   </TableCell>
                   <TableCell>
                     <select
                       value={appointment.status}
-                      className={`border border-gray-300 rounded-md p-1 ${
-                        appointment.status === "已取消"
-                          ? "opacity-50 pointer-none:"
-                          : ""
+                      className={`border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        appointment.status === "已取消" ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                      } ${
+                        appointment.status === "已预约" ? "text-blue-600 bg-blue-50" :
+                        appointment.status === "已完成" ? "text-green-600 bg-green-50" :
+                        "text-red-600 bg-red-50"
                       }`}
                       onChange={(e) =>
                         handleStatusChange(
