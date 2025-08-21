@@ -15,6 +15,12 @@
 - **沙龙管理** - 添加、编辑和删除沙龙/水疗中心
 - **预约管理** - 查看和管理所有预约
 - **统计仪表板** - 查看业务统计数据
+- **系统设置** - 完整的系统配置管理
+  - 个人信息管理和密码修改
+  - 系统基础设置（网站名称、时区、语言等）
+  - 通知设置（邮件、短信通知开关）
+  - 安全设置（双因素认证、登录日志查看）
+  - 数据备份管理（自动/手动备份、备份历史）
 - **地理位置集成** - 高德地图 API 集成用于位置选择
 
 ### 技术特性
@@ -84,60 +90,297 @@ NEXT_PUBLIC_AMAP_API_KEY=your_amap_api_key
 
 ### 4. 数据库设置
 
-在 Supabase 中创建以下表结构：
+#### 4.1 创建数据库表
+
+在 Supabase SQL 编辑器中执行以下 SQL 语句：
 
 ```sql
--- 用户表
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  role VARCHAR(10) DEFAULT 'user' CHECK (role IN ('user', 'admin')),
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+-- 1. 用户表 (user_profiles)
+CREATE TABLE user_profiles (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 沙龙/水疗中心表
+-- 创建索引
+CREATE INDEX idx_user_profiles_email ON user_profiles(email);
+CREATE INDEX idx_user_profiles_role ON user_profiles(role);
+
+-- 2. 沙龙/SPA表 (salon_spas)
 CREATE TABLE salon_spas (
-  id SERIAL PRIMARY KEY,
-  owner_id INTEGER REFERENCES users(id),
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  address TEXT NOT NULL,
-  city VARCHAR(100) NOT NULL,
-  state VARCHAR(100) NOT NULL,
-  zip VARCHAR(20) NOT NULL,
-  working_days TEXT[] DEFAULT '{}',
-  start_time TIME NOT NULL,
-  end_time TIME NOT NULL,
-  break_start_time TIME,
-  break_end_time TIME,
-  min_service_price DECIMAL(10,2) NOT NULL,
-  max_service_price DECIMAL(10,2) NOT NULL,
-  slot_duration INTEGER DEFAULT 60,
-  max_bookings_per_slot INTEGER DEFAULT 1,
-  location_name VARCHAR(255),
-  latitude DECIMAL(10,8),
-  longitude DECIMAL(11,8),
-  offer_status VARCHAR(50) DEFAULT 'active',
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+    id BIGSERIAL PRIMARY KEY,
+    owner_id BIGINT REFERENCES user_profiles(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    address TEXT NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+    zip VARCHAR(20) NOT NULL,
+    working_days TEXT[] DEFAULT ARRAY['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    start_time TIME DEFAULT '09:00:00',
+    end_time TIME DEFAULT '18:00:00',
+    break_start_time TIME DEFAULT '12:00:00',
+    break_end_time TIME DEFAULT '13:00:00',
+    min_service_price DECIMAL(10,2) DEFAULT 0,
+    max_service_price DECIMAL(10,2) DEFAULT 1000,
+    slot_duration INTEGER DEFAULT 60, -- 分钟
+    max_bookings_per_slot INTEGER DEFAULT 1,
+    location_name VARCHAR(255),
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    offer_status VARCHAR(20) DEFAULT 'active' CHECK (offer_status IN ('active', 'inactive', 'pending')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 预约表
+-- 创建索引
+CREATE INDEX idx_salon_spas_owner_id ON salon_spas(owner_id);
+CREATE INDEX idx_salon_spas_city ON salon_spas(city);
+CREATE INDEX idx_salon_spas_offer_status ON salon_spas(offer_status);
+
+-- 3. 预约表 (appointments)
 CREATE TABLE appointments (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),
-  salon_spa_id INTEGER REFERENCES salon_spas(id),
-  date DATE NOT NULL,
-  time TIME NOT NULL,
-  status VARCHAR(20) DEFAULT 'booked' CHECK (status IN ('booked', 'completed', 'canceled')),
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES user_profiles(id) ON DELETE CASCADE,
+    salon_spa_id BIGINT REFERENCES salon_spas(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    status VARCHAR(20) DEFAULT '已预约' CHECK (status IN ('已预约', '已完成', '已取消')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- 创建索引
+CREATE INDEX idx_appointments_user_id ON appointments(user_id);
+CREATE INDEX idx_appointments_salon_spa_id ON appointments(salon_spa_id);
+CREATE INDEX idx_appointments_date ON appointments(date);
+CREATE INDEX idx_appointments_status ON appointments(status);
+
+-- 创建唯一约束，防止同一时间段重复预约
+CREATE UNIQUE INDEX idx_appointments_unique_slot ON appointments(salon_spa_id, date, time) WHERE status != '已取消';
+
+-- 4. 系统设置表 (system_settings)
+CREATE TABLE system_settings (
+    id BIGSERIAL PRIMARY KEY,
+    site_name VARCHAR(255) DEFAULT '美容预约系统',
+    site_description TEXT DEFAULT '专业的美容沙龙预约管理平台',
+    timezone VARCHAR(50) DEFAULT 'Asia/Shanghai',
+    language VARCHAR(10) DEFAULT 'zh-CN',
+    maintenance_mode BOOLEAN DEFAULT false,
+    allow_registration BOOLEAN DEFAULT true,
+    email_notifications BOOLEAN DEFAULT true,
+    sms_notifications BOOLEAN DEFAULT false,
+    auto_backup BOOLEAN DEFAULT true,
+    backup_frequency VARCHAR(20) DEFAULT 'daily' CHECK (backup_frequency IN ('daily', 'weekly', 'monthly')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 插入默认设置
+INSERT INTO system_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+-- 5. 备份日志表 (backup_logs)
+CREATE TABLE backup_logs (
+    id BIGSERIAL PRIMARY KEY,
+    backup_name VARCHAR(255) NOT NULL,
+    backup_size BIGINT DEFAULT 0, -- 字节
+    backup_type VARCHAR(20) DEFAULT 'manual' CHECK (backup_type IN ('manual', 'auto')),
+    status VARCHAR(20) DEFAULT 'completed' CHECK (status IN ('pending', 'in_progress', 'completed', 'failed')),
+    file_path TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 创建索引
+CREATE INDEX idx_backup_logs_created_at ON backup_logs(created_at);
+CREATE INDEX idx_backup_logs_status ON backup_logs(status);
+
+-- 6. 登录日志表 (login_logs)
+CREATE TABLE login_logs (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES user_profiles(id) ON DELETE CASCADE,
+    ip_address INET,
+    user_agent TEXT,
+    login_time TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    success BOOLEAN DEFAULT true
+);
+
+-- 创建索引
+CREATE INDEX idx_login_logs_user_id ON login_logs(user_id);
+CREATE INDEX idx_login_logs_login_time ON login_logs(login_time);
+CREATE INDEX idx_login_logs_ip_address ON login_logs(ip_address);
 ```
+
+#### 4.2 创建触发器和函数
+
+```sql
+-- 创建更新时间戳函数
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- 为相关表添加触发器
+CREATE TRIGGER update_user_profiles_updated_at 
+    BEFORE UPDATE ON user_profiles 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_salon_spas_updated_at 
+    BEFORE UPDATE ON salon_spas 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_appointments_updated_at 
+    BEFORE UPDATE ON appointments 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_system_settings_updated_at 
+    BEFORE UPDATE ON system_settings 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+```
+
+#### 4.3 配置 Row Level Security (RLS)
+
+```sql
+-- 1. 用户表策略
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- 用户只能查看自己的信息
+CREATE POLICY "Users can view own profile" ON user_profiles
+    FOR SELECT USING (auth.uid()::text = id::text);
+
+-- 用户只能更新自己的信息
+CREATE POLICY "Users can update own profile" ON user_profiles
+    FOR UPDATE USING (auth.uid()::text = id::text);
+
+-- 管理员可以查看所有用户
+CREATE POLICY "Admins can view all profiles" ON user_profiles
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM user_profiles 
+            WHERE id::text = auth.uid()::text AND role = 'admin'
+        )
+    );
+
+-- 2. 沙龙/SPA表策略
+ALTER TABLE salon_spas ENABLE ROW LEVEL SECURITY;
+
+-- 所有人都可以查看活跃的沙龙
+CREATE POLICY "Anyone can view active salons" ON salon_spas
+    FOR SELECT USING (offer_status = 'active');
+
+-- 拥有者可以管理自己的沙龙
+CREATE POLICY "Owners can manage own salons" ON salon_spas
+    FOR ALL USING (owner_id::text = auth.uid()::text);
+
+-- 管理员可以查看所有沙龙
+CREATE POLICY "Admins can view all salons" ON salon_spas
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM user_profiles 
+            WHERE id::text = auth.uid()::text AND role = 'admin'
+        )
+    );
+
+-- 3. 预约表策略
+ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+
+-- 用户可以查看自己的预约
+CREATE POLICY "Users can view own appointments" ON appointments
+    FOR SELECT USING (user_id::text = auth.uid()::text);
+
+-- 用户可以创建预约
+CREATE POLICY "Users can create appointments" ON appointments
+    FOR INSERT WITH CHECK (user_id::text = auth.uid()::text);
+
+-- 用户可以更新自己的预约
+CREATE POLICY "Users can update own appointments" ON appointments
+    FOR UPDATE USING (user_id::text = auth.uid()::text);
+
+-- 沙龙拥有者可以查看自己沙龙的预约
+CREATE POLICY "Salon owners can view salon appointments" ON appointments
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM salon_spas 
+            WHERE id = appointments.salon_spa_id 
+            AND owner_id::text = auth.uid()::text
+        )
+    );
+
+-- 管理员可以查看所有预约
+CREATE POLICY "Admins can view all appointments" ON appointments
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM user_profiles 
+            WHERE id::text = auth.uid()::text AND role = 'admin'
+        )
+    );
+
+-- 4. 系统设置表策略
+ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
+
+-- 所有人都可以查看系统设置
+CREATE POLICY "Anyone can view system settings" ON system_settings
+    FOR SELECT USING (true);
+
+-- 只有管理员可以更新系统设置
+CREATE POLICY "Only admins can update system settings" ON system_settings
+    FOR UPDATE USING (
+        EXISTS (
+            SELECT 1 FROM user_profiles 
+            WHERE id::text = auth.uid()::text AND role = 'admin'
+        )
+    );
+
+-- 5. 备份和日志表策略
+ALTER TABLE backup_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Only admins can access backup logs" ON backup_logs
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM user_profiles 
+            WHERE id::text = auth.uid()::text AND role = 'admin'
+        )
+    );
+
+ALTER TABLE login_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own login logs" ON login_logs
+    FOR SELECT USING (user_id::text = auth.uid()::text);
+
+CREATE POLICY "Admins can view all login logs" ON login_logs
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM user_profiles 
+            WHERE id::text = auth.uid()::text AND role = 'admin'
+        )
+    );
+```
+
+#### 4.4 创建初始管理员用户
+
+```sql
+-- 创建管理员用户（请修改密码）
+-- 注意：密码需要使用 bcrypt 加密，这里只是示例
+INSERT INTO user_profiles (name, email, password, role) 
+VALUES (
+    '系统管理员', 
+    'admin@example.com', 
+    '$2a$10$example_hashed_password', -- 请使用实际的 bcrypt 加密密码
+    'admin'
+) ON CONFLICT (email) DO NOTHING;
+```
+
+> **重要提示**: 
+> - 请确保将 `admin@example.com` 替换为实际的管理员邮箱
+> - 密码必须使用 bcrypt 加密后存储
+> - 建议在生产环境中使用强密码
 
 ### 5. 启动开发服务器
 
@@ -160,12 +403,23 @@ src/
 ├── actions/           # 服务器操作
 │   ├── appointments.ts
 │   ├── salon-spas.ts
+│   ├── settings.ts   # 系统设置相关操作
 │   └── users.ts
 ├── app/              # Next.js App Router
 │   ├── (private)/    # 私有路由
 │   │   ├── admin/    # 管理员页面
+│   │   │   ├── appointments/  # 预约管理
+│   │   │   ├── dashboard/     # 管理员仪表板
+│   │   │   ├── salon-spas/    # 沙龙管理
+│   │   │   └── settings/      # 系统设置
 │   │   └── user/     # 用户页面
+│   │       ├── appointments/      # 用户预约
+│   │       ├── dashboard/         # 用户仪表板
+│   │       ├── profile/           # 个人资料
+│   │       └── schedule-appointment/ # 预约服务
 │   └── (public)/     # 公共路由
+│       ├── login/    # 登录页面
+│       └── register/ # 注册页面
 ├── components/       # 可复用组件
 │   └── ui/          # UI 组件库
 ├── config/          # 配置文件
@@ -249,8 +503,24 @@ npm run lint
 项目使用 Next.js Server Actions 处理 API 请求：
 
 - `/actions/users.ts` - 用户相关操作
+  - `registerUser()` - 用户注册
+  - `loginUser()` - 用户登录
+  - `getUserInfo()` - 获取用户信息
 - `/actions/salon-spas.ts` - 沙龙管理操作
+  - `getSalonSpasByOwner()` - 获取拥有者的沙龙列表
+  - `deleteSalonSpaById()` - 删除沙龙
+  - 沙龙的增删改查操作
 - `/actions/appointments.ts` - 预约管理操作
+  - `getAdminDashboardStats()` - 获取管理员仪表板统计
+  - 预约的增删改查操作
+- `/actions/settings.ts` - 系统设置操作
+  - `updateUserProfile()` - 更新用户个人信息
+  - `getSystemSettings()` - 获取系统设置
+  - `updateSystemSettings()` - 更新系统设置
+  - `createDataBackup()` - 创建数据备份
+  - `getBackupHistory()` - 获取备份历史
+  - `getLoginLogs()` - 获取登录日志
+  - `logUserLogin()` - 记录登录日志
 
 ## 🤝 贡献
 
