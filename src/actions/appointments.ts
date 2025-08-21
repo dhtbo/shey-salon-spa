@@ -123,3 +123,78 @@ export const updateAppointmentStatus = async (appointmentId: number, status: str
     }
   }
 }
+
+export const getAdminDashboardStats = async () => {
+  try {
+    // 获取所有预约数据
+    const { data: appointments, error } = await supabase
+      .from("appointments")
+      .select("*")
+    
+    if (error) throw error
+
+    // 计算统计数据
+    const totalBookings = appointments.length
+    const canceledBookings = appointments.filter(apt => apt.status === 'canceled').length
+    const completedBookings = appointments.filter(apt => apt.status === 'completed').length
+    
+    // 计算即将到来的预约（今天及以后的已预订状态）
+    const today = new Date().toISOString().split('T')[0]
+    const upcomingBookings = appointments.filter(apt => 
+      apt.status === 'booked' && apt.date >= today
+    ).length
+
+    return {
+      success: true,
+      data: {
+        totalBookings,
+        canceledBookings,
+        completedBookings,
+        upcomingBookings
+      }
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+    }
+  }
+}
+
+export const getUserDashboardStats = async (userId: number) => {
+  try {
+    // 获取当前用户的预约数据
+    const { data: appointments, error } = await supabase
+      .from("appointments")
+      .select("*")
+      .eq("user_id", userId)
+    
+    if (error) throw error
+
+    // 计算统计数据
+    const totalBookings = appointments.length
+    const canceledBookings = appointments.filter(apt => apt.status === 'canceled').length
+    const completedBookings = appointments.filter(apt => apt.status === 'completed').length
+    
+    // 计算即将到来的预约（今天及以后的已预订状态）
+    const today = new Date().toISOString().split('T')[0]
+    const upcomingBookings = appointments.filter(apt => 
+      apt.status === 'booked' && apt.date >= today
+    ).length
+
+    return {
+      success: true,
+      data: {
+        totalBookings,
+        canceledBookings,
+        completedBookings,
+        upcomingBookings
+      }
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+    }
+  }
+}
